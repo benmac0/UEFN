@@ -1,0 +1,54 @@
+
+using { /Fortnite.com/Devices }
+using { /Fortnite.com/Characters }
+using { /Verse.org/Simulation }
+using { /UnrealEngine.com/Temporary/Diagnostics }
+using { /UnrealEngine.com/Temporary/SpatialMath }
+# See https://dev.epicgames.com/documentation/en-us/uefn/create-your-own-device-in-verse for how to create a verse device.
+
+# A Verse-authored creative device that can be placed in a level
+spawn_pet_device := class(creative_device):
+   
+
+    @editable var Monster : creative_prop = creative_prop{}
+    @editable var MonsterMutator : mutator_zone_device = mutator_zone_device{}
+
+    
+    OnBegin<override>()<suspends>:void=
+        MonsterMutator.AgentEntersEvent.Subscribe(OnPlayerSpotted)
+        Players := GetPlayspace().GetPlayers()
+            if (Player := Players[0], Agent := agent[Player]):
+
+
+    OnPlayerSpotted(Agent : agent):void=
+            Players := GetPlayspace().GetPlayers()
+            if (Player := Players[0]):
+                spawn:
+                    FollowPlayer(Monster, Player)
+                
+    FollowPlayer(Enemy : creative_prop, Player : player)<suspends>:void=
+        var PreviousTime : float = GetSimulationElapsedTime()
+            MoveSpeed := 20
+            loop:
+                Sleep(0.0)
+
+                if (PlayerCharacter := Player.GetFortCharacter[], Enemy.IsValid[]):
+                    
+                    PlayerTran := PlayerCharacter.GetTransform()
+                    Enemy.MoveTo(PlayerTran.Translation, Enemy.GetTransform().Rotation, 2.0)
+
+                    PropLocation := Enemy.GetTransform().Translation
+                    PlayerLocation := PlayerCharacter.GetTransform().Translation
+    
+                    if (LookDirection := (PlayerLocation - PropLocation).MakeUnitVector[]):
+    
+                        Yaw := RadiansToDegrees(ArcTan(LookDirection.Y, LookDirection.X)) - 90.0
+                        Pitch := 0.0 #RadiansToDegrees(ArcTan(LookDirection.Z, Sqrt((LookDirection.X * LookDirection.X) + (LookDirection.Y * LookDirection.Y))))
+                        Roll := 0.0
+
+                        DistanceFromPlayer := Distance(PlayerLocation, PropLocation)
+                        Time := DistanceFromPlayer / 900.0
+
+                        NewRotation := MakeRotationFromYawPitchRollDegrees(Yaw, Pitch, Roll)
+                        Enemy.MoveTo(Enemy.GetTransform().Translation, NewRotation, Time)
+                    
