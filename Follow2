@@ -1,0 +1,52 @@
+
+using { /Fortnite.com/Devices }
+using { /Fortnite.com/Characters }
+using { /Verse.org/Simulation }
+using { /UnrealEngine.com/Temporary/Diagnostics }
+using { /UnrealEngine.com/Temporary/SpatialMath }
+# See https://dev.epicgames.com/documentation/en-us/uefn/create-your-own-device-in-verse for how to create a verse device.
+
+# A Verse-authored creative device that can be placed in a level
+Follow := class(creative_device):
+   
+
+    @editable var Damage1 : creative_prop = creative_prop{}
+    @editable var Damage2 : creative_prop = creative_prop{}
+    @editable var Damage3 : creative_prop = creative_prop{}
+    @editable var Damage4 : creative_prop = creative_prop{}
+    @editable var Damage5 : creative_prop = creative_prop{}
+    @editable var Mutator : mutator_zone_device = mutator_zone_device{}
+
+    
+    OnBegin<override>()<suspends>:void=
+        Mutator.AgentEntersEvent.Subscribe(OnPlayerSpotted)
+        Players := GetPlayspace().GetPlayers()
+            if (Player := Players[0], Agent := agent[Player]):
+
+
+    OnPlayerSpotted(Agent : agent):void=
+            Players := GetPlayspace().GetPlayers()
+            if (Player := Players[0]):
+                spawn:
+                    FollowPlayer(Damage1, Player)
+                
+    FollowPlayer(Damage1 : creative_prop, FortniteCharacter : player)<suspends>:void=
+            loop:
+                Sleep(0.0)
+                    PlayerLocation := FortniteCharacter.GetTransform().Translation
+            		PropLocation := Damage1.GetTransform().Translation
+
+            		DistanceFromPlayer := Distance(PlayerLocation, PropLocation)
+            		Time := DistanceFromPlayer / 900.0
+            		Damage1.MoveTo(PlayerLocation, rotation{}, Time)
+                    
+    
+                    if (LookDirection := (PlayerLocation - PropLocation).MakeUnitVector[]):
+    
+                        Yaw := RadiansToDegrees(ArcTan(LookDirection.Y, LookDirection.X)) - 90.0
+                        Pitch := 0.0 #RadiansToDegrees(ArcTan(LookDirection.Z, Sqrt((LookDirection.X * LookDirection.X) + (LookDirection.Y * LookDirection.Y))))
+                        Roll := 0.0
+
+                        DistanceFromPlayer := Distance(PlayerLocation, PropLocation)
+						Time := DistanceFromPlayer / 900.0
+
