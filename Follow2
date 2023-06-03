@@ -2,12 +2,13 @@
 using { /Fortnite.com/Devices }
 using { /Fortnite.com/Characters }
 using { /Verse.org/Simulation }
+using { /Verse.org/Verse }
 using { /UnrealEngine.com/Temporary/Diagnostics }
 using { /UnrealEngine.com/Temporary/SpatialMath }
 # See https://dev.epicgames.com/documentation/en-us/uefn/create-your-own-device-in-verse for how to create a verse device.
 
 # A Verse-authored creative device that can be placed in a level
-Follow := class(creative_device):
+follow := class(creative_device):
    
 
     @editable var Damage1 : creative_prop = creative_prop{}
@@ -28,25 +29,62 @@ Follow := class(creative_device):
             Players := GetPlayspace().GetPlayers()
             if (Player := Players[0]):
                 spawn:
-                    FollowPlayer(Damage1, Player)
+                    FollowPlayer(Damage1, Player, Damage2)
+                spawn:
+                    FollowPlayer2(Damage2, Player)
+                    
                 
-    FollowPlayer(Damage1 : creative_prop, FortniteCharacter : player)<suspends>:void=
+    FollowPlayer(Damage11 : creative_prop, Player : player, Damage22 : creative_prop)<suspends>:void=
+        var PreviousTime : float = GetSimulationElapsedTime()
             loop:
                 Sleep(0.0)
-                    PlayerLocation := FortniteCharacter.GetTransform().Translation
-            		PropLocation := Damage1.GetTransform().Translation
 
-            		DistanceFromPlayer := Distance(PlayerLocation, PropLocation)
-            		Time := DistanceFromPlayer / 900.0
-            		Damage1.MoveTo(PlayerLocation, rotation{}, Time)
+                if (PlayerCharacter := Player.GetFortCharacter[], Damage11.IsValid[]):
                     
+                    PlayerTran := PlayerCharacter.GetTransform()
+                    Damage11.MoveTo(PlayerTran.Translation, Damage11.GetTransform().Rotation, 2.0)
+
+                    PropLocation := Damage11.GetTransform().Translation
+                    PlayerLocation := PlayerCharacter.GetTransform().Translation
     
                     if (LookDirection := (PlayerLocation - PropLocation).MakeUnitVector[]):
     
-                        Yaw := RadiansToDegrees(ArcTan(LookDirection.Y, LookDirection.X)) - 90.0
+                        Yaw := RadiansToDegrees(ArcTan(LookDirection.Y, LookDirection.X)) - 0.0
                         Pitch := 0.0 #RadiansToDegrees(ArcTan(LookDirection.Z, Sqrt((LookDirection.X * LookDirection.X) + (LookDirection.Y * LookDirection.Y))))
                         Roll := 0.0
 
                         DistanceFromPlayer := Distance(PlayerLocation, PropLocation)
-						Time := DistanceFromPlayer / 900.0
+                        Time := DistanceFromPlayer / 900.0
+            
+                            
+                        NewRotation := MakeRotationFromYawPitchRollDegrees(Yaw, Pitch, Roll)
+                        Damage11.MoveTo(Damage11.GetTransform().Translation, NewRotation, Time)
 
+    FollowPlayer2(Damage22 : creative_prop, Player : player)<suspends>:void=
+        var PreviousTime : float = GetSimulationElapsedTime()
+            loop:
+                
+
+                if (PlayerCharacter := Player.GetFortCharacter[], Damage22.IsValid[]):
+                    
+                    PlayerTran := PlayerCharacter.GetTransform()
+                    Sleep(0.0)
+                    Damage22.MoveTo(PlayerTran.Translation, Damage22.GetTransform().Rotation, 2.0)
+
+                    PropLocation := Damage22.GetTransform().Translation
+                    PlayerLocation := PlayerCharacter.GetTransform().Translation
+    
+                    if (LookDirection := (PlayerLocation - PropLocation).MakeUnitVector[]):
+    
+                        Yaw := RadiansToDegrees(ArcTan(LookDirection.Y, LookDirection.X)) - 0.0
+                        Pitch := 0.0 #RadiansToDegrees(ArcTan(LookDirection.Z, Sqrt((LookDirection.X * LookDirection.X) + (LookDirection.Y * LookDirection.Y))))
+                        Roll := 0.0
+
+                        DistanceFromPlayer := Distance(PlayerLocation, PropLocation)
+                        Time := DistanceFromPlayer / 1500.0
+            
+                            
+                        NewRotation := MakeRotationFromYawPitchRollDegrees(Yaw, Pitch, Roll)
+                        Damage22.MoveTo(Damage22.GetTransform().Translation, NewRotation, Time)
+
+                
