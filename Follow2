@@ -29,12 +29,12 @@ follow := class(creative_device):
             Players := GetPlayspace().GetPlayers()
             if (Player := Players[0]):
                 spawn:
-                    FollowPlayer(Damage1, Player, Damage2)
+                    FollowPlayer(Damage1, Player)
                 spawn:
                     FollowPlayer2(Damage2, Player)
                     
                 
-    FollowPlayer(Damage11 : creative_prop, Player : player, Damage22 : creative_prop)<suspends>:void=
+    FollowPlayer(Damage11 : creative_prop, Player : player)<suspends>:void=
         var PreviousTime : float = GetSimulationElapsedTime()
             loop:
                 Sleep(0.0)
