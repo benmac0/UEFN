@@ -2,25 +2,20 @@
 using { /Fortnite.com/Devices }
 using { /Fortnite.com/Characters }
 using { /Verse.org/Simulation }
-using { /Verse.org/Verse }
 using { /UnrealEngine.com/Temporary/Diagnostics }
 using { /UnrealEngine.com/Temporary/SpatialMath }
 # See https://dev.epicgames.com/documentation/en-us/uefn/create-your-own-device-in-verse for how to create a verse device.
 
 # A Verse-authored creative device that can be placed in a level
-follow := class(creative_device):
+spawn_pet_device := class(creative_device):
    
 
-    @editable var Damage1 : creative_prop = creative_prop{}
-    @editable var Damage2 : creative_prop = creative_prop{}
-    @editable var Damage3 : creative_prop = creative_prop{}
-    @editable var Damage4 : creative_prop = creative_prop{}
-    @editable var Damage5 : creative_prop = creative_prop{}
-    @editable var Mutator : mutator_zone_device = mutator_zone_device{}
+    @editable var Monster : creative_prop = creative_prop{}
+    @editable var MonsterMutator : mutator_zone_device = mutator_zone_device{}
 
     
     OnBegin<override>()<suspends>:void=
-        Mutator.AgentEntersEvent.Subscribe(OnPlayerSpotted)
+        MonsterMutator.AgentEntersEvent.Subscribe(OnPlayerSpotted)
         Players := GetPlayspace().GetPlayers()
             if (Player := Players[0], Agent := agent[Player]):
 
@@ -29,62 +24,35 @@ follow := class(creative_device):
             Players := GetPlayspace().GetPlayers()
             if (Player := Players[0]):
                 spawn:
-                    FollowPlayer(Damage1, Player)
-                spawn:
-                    FollowPlayer2(Damage2, Player)
-                    
+                    FollowPlayer(Monster, Player)
                 
-    FollowPlayer(Damage11 : creative_prop, Player : player)<suspends>:void=
+    FollowPlayer(Enemy : creative_prop, Player : player)<suspends>:void=
         var PreviousTime : float = GetSimulationElapsedTime()
+            MoveSpeed := 20
             loop:
                 Sleep(0.0)
 
-                if (PlayerCharacter := Player.GetFortCharacter[], Damage11.IsValid[]):
+                if (PlayerCharacter := Player.GetFortCharacter[], Enemy.IsValid[] and DistanceFromPlayer > 25):
                     
                     PlayerTran := PlayerCharacter.GetTransform()
-                    Damage11.MoveTo(PlayerTran.Translation, Damage11.GetTransform().Rotation, 2.0)
+                    DistanceFromPlayer := Distance(PlayerLocation, PropLocation)
+                    
+                    Enemy.MoveTo(PlayerTran.Translation, Enemy.GetTransform().Rotation, 2.0)
 
-                    PropLocation := Damage11.GetTransform().Translation
+                    PropLocation := Enemy.GetTransform().Translation
                     PlayerLocation := PlayerCharacter.GetTransform().Translation
     
                     if (LookDirection := (PlayerLocation - PropLocation).MakeUnitVector[]):
     
-                        Yaw := RadiansToDegrees(ArcTan(LookDirection.Y, LookDirection.X)) - 0.0
+                        Yaw := RadiansToDegrees(ArcTan(LookDirection.Y, LookDirection.X)) - 90.0
                         Pitch := 0.0 #RadiansToDegrees(ArcTan(LookDirection.Z, Sqrt((LookDirection.X * LookDirection.X) + (LookDirection.Y * LookDirection.Y))))
                         Roll := 0.0
 
-                        DistanceFromPlayer := Distance(PlayerLocation, PropLocation)
-                        Time := DistanceFromPlayer / 900.0
-            
-                            
+
                         NewRotation := MakeRotationFromYawPitchRollDegrees(Yaw, Pitch, Roll)
-                        Damage11.MoveTo(Damage11.GetTransform().Translation, NewRotation, Time)
+                        Enemy.MoveTo(Enemy.GetTransform().Translation, NewRotation, 0.0)
+			
 
-    FollowPlayer2(Damage22 : creative_prop, Player : player)<suspends>:void=
-        var PreviousTime : float = GetSimulationElapsedTime()
-            loop:
-                
 
-                if (PlayerCharacter := Player.GetFortCharacter[], Damage22.IsValid[]):
-                    
-                    PlayerTran := PlayerCharacter.GetTransform()
-                    Sleep(0.0)
-                    Damage22.MoveTo(PlayerTran.Translation, Damage22.GetTransform().Rotation, 2.0)
 
-                    PropLocation := Damage22.GetTransform().Translation
-                    PlayerLocation := PlayerCharacter.GetTransform().Translation
-    
-                    if (LookDirection := (PlayerLocation - PropLocation).MakeUnitVector[]):
-    
-                        Yaw := RadiansToDegrees(ArcTan(LookDirection.Y, LookDirection.X)) - 0.0
-                        Pitch := 0.0 #RadiansToDegrees(ArcTan(LookDirection.Z, Sqrt((LookDirection.X * LookDirection.X) + (LookDirection.Y * LookDirection.Y))))
-                        Roll := 0.0
 
-                        DistanceFromPlayer := Distance(PlayerLocation, PropLocation)
-                        Time := DistanceFromPlayer / 1500.0
-            
-                            
-                        NewRotation := MakeRotationFromYawPitchRollDegrees(Yaw, Pitch, Roll)
-                        Damage22.MoveTo(Damage22.GetTransform().Translation, NewRotation, Time)
-
-                
