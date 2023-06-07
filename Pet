@@ -1,23 +1,23 @@
-using { /Fortnite.com/Devices }
-using { /Verse.org/Simulation }
-using { /UnrealEngine.com/Temporary/Diagnostics }
 using { /Fortnite.com/Characters }
-using { /UnrealEngine.com/Temporary/SpatialMath }
+using { /Fortnite.com/Devices }
 using { /Fortnite.com/Playspaces }
+using { /UnrealEngine.com/Temporary/Diagnostics }
+using { /UnrealEngine.com/Temporary/SpatialMath }
+using { /Verse.org/Simulation }
  
 NPC:= class(creative_device):
  
-@editable
-RotationProp<private> : creative_prop = creative_prop{}
-@editable
-TranslationProp<private> : creative_prop = creative_prop{}
-@editable
-UnitsPerSecond<private> : float = 100.0
-@editable
-MaxDistanceToPlayer<private> : float = 25.0
+	@editable
+	RotationProp<private> : creative_prop = creative_prop{}
+	@editable
+	TranslationProp<private> : creative_prop = creative_prop{}
+	@editable
+	UnitsPerSecond<private> : float = 100.0
+	@editable
+	MaxDistanceToPlayer<private> : float = 25.0
 
-Var MaybePlayer<private> : ?player = false
-Var IsMoving<private> : logic = false
+	var MaybePlayer<private> : ?player = false
+	var IsMoving<private> : logic = false
 
 	OnBegin<override>()<suspends>:void =
 		StorePlayerReference()
