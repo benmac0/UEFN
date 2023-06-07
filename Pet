@@ -1,0 +1,81 @@
+using { /Fortnite.com/Devices }
+using { /Verse.org/Simulation }
+using { /UnrealEngine.com/Temporary/Diagnostics }
+using { /Fortnite.com/Characters }
+using { /UnrealEngine.com/Temporary/SpatialMath }
+using { /Fortnite.com/Playspaces }
+ 
+NPC:= class(creative_device):
+ 
+@editable
+RotationProp<private> : creative_prop = creative_prop{}
+@editable
+TranslationProp<private> : creative_prop = creative_prop{}
+@editable
+UnitsPerSecond<private> : float = 100.0
+@editable
+MaxDistanceToPlayer<private> : float = 25.0
+
+Var MaybePlayer<private> : ?player = false
+Var IsMoving<private> : logic = false
+
+	OnBegin<override>()<suspends>:void =
+		StorePlayerReference()
+		loop: 
+			RotateToPlayer()
+			Sleep(0,0)
+			spawn{MoveToPlayer()}
+
+	StorePlayerReference() : void = 
+	if: 
+		Player : player = Self.GetPlayspace().GetPlayers()[0]
+	then: 
+		set MaybePlayer = option{player}
+
+	RotateToPlayer() : void = 
+		if:
+			FortCharacter : fort_character = MaybePlayer?.GetFortCharacter[]
+		then:
+			PlayerTranslation : vectors3 = FortCharacter.GetTransform().Translation
+			CurrentTranslation : vector3 = TranslationProp.GetTransform().Translation
+
+			# Calculates rotation to the player.
+			VectorToPlayer : vector3 = PlayerTranslation - CurrentTranslation
+			RadianToPlayer : float = ArcTan(VectorToPlayer.X, VectorToPlayer.Y)
+			RotationAxis := vector3:
+				X := 0.0,
+				Y := 0.0,
+				Z := -1.0,
+			NewRotation : rotation = MakeRotation(RotationAxis, RadianToPlayer)
+
+			# Looks at Player.
+			if (RotationProp.TeleportTo[CurrentTranslation, NewRotation]) {}
+
+	MoveToPlayer()<suspends> : void =
+		if: 
+			FortCharacter : fort_character = MaybePlayer?.GetFortCharacter[]
+		then:
+			PlayerTranslation : vector3
+				FortCharacter.GetTransform().Translation
+			CurrentTranslation : vector3 = 
+				TranslationProp.GetTransform().Translation
+			CurrentRotation : rotation =
+				TranslationProp.GetTransform().RotationAxis
+			TranslationToPlayer := vector3:
+				X := PlayerTranslation.X
+				Y := PlayerTranslation.Y
+				Z := PlayerTranslation.Z
+
+			DistanceToPlayer : float =
+				Distance(CurrentTranslation, TranslationToPlayer)
+
+			if:
+				# doesn't move if player is inside its range.
+				DistanceToPlayer > MaxDistanceToPlayer
+			then:
+				# moves TranslationProp to the players Translation.
+				TranslationProp.MoveTo(
+					TranslationToPlayer,
+					CurrentRotation,
+					DistanceToPlayer / UnitsPerSecond
+				)
