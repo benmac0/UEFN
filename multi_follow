@@ -38,20 +38,20 @@ spawn_pet_device := class(creative_device):
                         PlayerTran := PlayerCharacter.GetTransform()
                         DistanceFromPlayer := Distance(PlayerLocation, PropLocation)
                     
-                        Enemy.MoveTo(PlayerTran.Translation, Enemy.GetTransform().Rotation, 2.0)
+                        Enemy.MoveTo(PlayerTran.Translation, Enemy.GetTransform().Rotation, 0.2)
 
                         PropLocation := Enemy.GetTransform().Translation
                         PlayerLocation := PlayerCharacter.GetTransform().Translation
     
                         if (LookDirection := (PlayerLocation - PropLocation).MakeUnitVector[]):
     
-                            Yaw := RadiansToDegrees(ArcTan(LookDirection.Y, LookDirection.X)) - 90.0
+                            Yaw := RadiansToDegrees(ArcTan(LookDirection.Y, LookDirection.X)) - 0.0
                             Pitch := 0.0 #RadiansToDegrees(ArcTan(LookDirection.Z, Sqrt((LookDirection.X * LookDirection.X) + (LookDirection.Y * LookDirection.Y))))
                             Roll := 0.0
 
 
                             NewRotation := MakeRotationFromYawPitchRollDegrees(Yaw, Pitch, Roll)
-                            Enemy.MoveTo(Enemy.GetTransform().Translation, NewRotation, 0.0)
+                            Enemy.MoveTo(Enemy.GetTransform().Translation, NewRotation, 0.2)
 			
 
 
