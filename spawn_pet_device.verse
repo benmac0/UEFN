@@ -35,20 +35,27 @@ spawn_pet_device := class(creative_device):
                 if (PlayerCharacter := Player.GetFortCharacter[], Enemy.IsValid[]):
                     
                     PlayerTran := PlayerCharacter.GetTransform()
-                    Enemy.MoveTo(PlayerTran.Translation, Enemy.GetTransform().Rotation, 2.0)
-
+                    
                     PropLocation := Enemy.GetTransform().Translation
                     PlayerLocation := PlayerCharacter.GetTransform().Translation
+                    
+                    DistanceFromPlayer := Distance(PlayerLocation, PropLocation)
+                    
+			            if:
+				            # doesn't move if player is inside its range.
+				            DistanceFromPlayer > 100
+			            then:
+                            Enemy.MoveTo(PlayerTran.Translation, Enemy.GetTransform().Rotation, 0.0)
     
-                    if (LookDirection := (PlayerLocation - PropLocation).MakeUnitVector[]):
+
+                            if (LookDirection := (PlayerLocation - PropLocation).MakeUnitVector[]):
     
-                        Yaw := RadiansToDegrees(ArcTan(LookDirection.Y, LookDirection.X)) - 90.0
-                        Pitch := 0.0 #RadiansToDegrees(ArcTan(LookDirection.Z, Sqrt((LookDirection.X * LookDirection.X) + (LookDirection.Y * LookDirection.Y))))
-                        Roll := 0.0
+                                Yaw := RadiansToDegrees(ArcTan(LookDirection.Y, LookDirection.X)) - 90.0
+                                Pitch := 0.0 #RadiansToDegrees(ArcTan(LookDirection.Z, Sqrt((LookDirection.X * LookDirection.X) + (LookDirection.Y * LookDirection.Y))))
+                                Roll := 0.0
 
-                        DistanceFromPlayer := Distance(PlayerLocation, PropLocation)
-                        Time := DistanceFromPlayer / 900.0
+             
 
-                        NewRotation := MakeRotationFromYawPitchRollDegrees(Yaw, Pitch, Roll)
-                        Enemy.MoveTo(Enemy.GetTransform().Translation, NewRotation, Time)
+                                NewRotation := MakeRotationFromYawPitchRollDegrees(Yaw, Pitch, Roll)
+                                Enemy.MoveTo(Enemy.GetTransform().Translation, NewRotation, 0.0)
                     
