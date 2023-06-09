@@ -1,18 +1,17 @@
-
 using { /Fortnite.com/Devices }
-using { /Fortnite.com/Characters }
+using {/Fortnite.com/Characters}
 using { /Verse.org/Simulation }
 using { /UnrealEngine.com/Temporary/Diagnostics }
 using { /UnrealEngine.com/Temporary/SpatialMath }
 # See https://dev.epicgames.com/documentation/en-us/uefn/create-your-own-device-in-verse for how to create a verse device.
 
 # A Verse-authored creative device that can be placed in a level
-spawn_pet_device := class(creative_device):
-   
+AttachDamage2 := class(creative_device):
 
     @editable var Monster : creative_prop = creative_prop{}
     @editable var MonsterMutator : mutator_zone_device = mutator_zone_device{}
-
+    @editable
+    MaxDistanceToPlayer<private> : float = 25.0
     
     OnBegin<override>()<suspends>:void=
         MonsterMutator.AgentEntersEvent.Subscribe(OnPlayerSpotted)
@@ -28,23 +27,23 @@ spawn_pet_device := class(creative_device):
                 
     FollowPlayer(Enemy : creative_prop, Player : player)<suspends>:void=
         var PreviousTime : float = GetSimulationElapsedTime()
-            MoveSpeed := 20
+            #MoveSpeed := 20
             loop:
                 Sleep(0.0)
 
                 if (PlayerCharacter := Player.GetFortCharacter[], Enemy.IsValid[]):
                     
                     PlayerTran := PlayerCharacter.GetTransform()
-                    
+                    Sleep(0.5)
                     PropLocation := Enemy.GetTransform().Translation
                     PlayerLocation := PlayerCharacter.GetTransform().Translation
                     
                     DistanceFromPlayer := Distance(PlayerLocation, PropLocation)
                     
-			            if:
-				            # doesn't move if player is inside its range.
-				            DistanceFromPlayer > 100
-			            then:
+                        if:
+                            # doesn't move if player is inside its range.
+                            DistanceFromPlayer > MaxDistanceToPlayer
+                        then:
                             Enemy.MoveTo(PlayerTran.Translation, Enemy.GetTransform().Rotation, 0.0)
     
 
@@ -58,4 +57,3 @@ spawn_pet_device := class(creative_device):
 
                                 NewRotation := MakeRotationFromYawPitchRollDegrees(Yaw, Pitch, Roll)
                                 Enemy.MoveTo(Enemy.GetTransform().Translation, NewRotation, 0.0)
-                    
