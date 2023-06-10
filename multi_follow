@@ -29,29 +29,27 @@ spawn_pet_device := class(creative_device):
     FollowPlayer(Enemy : creative_prop, Player : player)<suspends>:void=
         var PreviousTime : float = GetSimulationElapsedTime()
             MoveSpeed := 20
-            loop:
-                Sleep(0.0)
+        loop:    
+            if (PlayerCharacter := Player.GetFortCharacter[], Enemy.IsValid[]):
 
-                if (PlayerCharacter := Player.GetFortCharacter[], Enemy.IsValid[]): 
-                    if (DistanceFromPlayer > 25):
-                    
-                        PlayerTran := PlayerCharacter.GetTransform()
-                        DistanceFromPlayer := Distance(PlayerLocation, PropLocation)
-                    
-                        Enemy.MoveTo(PlayerTran.Translation, Enemy.GetTransform().Rotation, 0.2)
+                PlayerTran := PlayerCharacter.GetTransform()
+                Sleep(0.5)
+                
+                PropLocation := Enemy.GetTransform().Translation
+                PlayerLocation := PlayerCharacter.GetTransform().Translation
+                DistanceFromPlayer := Distance(PlayerLocation, PropLocation)
 
-                        PropLocation := Enemy.GetTransform().Translation
-                        PlayerLocation := PlayerCharacter.GetTransform().Translation
+                if (DistanceFromPlayer > MaxDistanceToPlayer):
+                    Enemy.MoveTo(PlayerTran.Translation, Enemy.GetTransform().Rotation, 0.1)
     
-                        if (LookDirection := (PlayerLocation - PropLocation).MakeUnitVector[]):
+                if (LookDirection := (PlayerLocation - PropLocation).MakeUnitVector[]):
     
-                            Yaw := RadiansToDegrees(ArcTan(LookDirection.Y, LookDirection.X)) - 0.0
-                            Pitch := 0.0 #RadiansToDegrees(ArcTan(LookDirection.Z, Sqrt((LookDirection.X * LookDirection.X) + (LookDirection.Y * LookDirection.Y))))
-                            Roll := 0.0
-
-
-                            NewRotation := MakeRotationFromYawPitchRollDegrees(Yaw, Pitch, Roll)
-                            Enemy.MoveTo(Enemy.GetTransform().Translation, NewRotation, 0.2)
+                    Yaw := RadiansToDegrees(ArcTan(LookDirection.Y, LookDirection.X)) - 0.0
+                    Pitch := 0.0 #RadiansToDegrees(ArcTan(LookDirection.Z, Sqrt((LookDirection.X * LookDirection.X) + (LookDirection.Y * LookDirection.Y))))
+                    Roll := 0.0
+    
+                    NewRotation := MakeRotationFromYawPitchRollDegrees(Yaw, Pitch, Roll)
+                    Enemy.MoveTo(Enemy.GetTransform().Translation, NewRotation, 0.0)
 			
 
 
