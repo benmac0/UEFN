@@ -12,6 +12,8 @@ spawn_pet_device := class(creative_device):
 
     @editable var Monster : creative_prop = creative_prop{}
     @editable var MonsterMutator : mutator_zone_device = mutator_zone_device{}
+    @editable
+    MaxDistanceToPlayer<private> : float = 1000.0
 
     
     OnBegin<override>()<suspends>:void=
