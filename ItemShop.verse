@@ -38,8 +38,7 @@ shop_item := class<concrete>():
 
     @editable
     ItemName: string = "Item"
-    @editable
-    ItemName: string = "Item"
+
     @editable
     ItemCost: type{X: int where X >= 0} = 10
 
