@@ -1,0 +1,54 @@
+using { /Fortnite.com/Devices }
+using { /Fortnite.com/Characters }
+using { /Verse.org/Simulation }
+using { /UnrealEngine.com/Temporary/Diagnostics }
+using { /UnrealEngine.com/Temporary/SpatialMath }
+using { /Fortnite.com/Game }
+# ██╗     ██╗    ██╗   ██╗██╗███████╗██╗   ██╗ █████╗ ██╗     
+# ██║     ██║    ██║   ██║██║██╔════╝██║   ██║██╔══██╗██║     
+# ██║     ██║    ██║   ██║██║███████╗██║   ██║███████║██║     
+# ██║     ██║    ╚██╗ ██╔╝██║╚════██║██║   ██║██╔══██║██║     
+# ███████╗███████╗╚████╔╝ ██║███████║╚██████╔╝██║  ██║███████╗
+# ╚══════╝╚══════╝ ╚═══╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝
+#VERSE SCRIPT
+#Author: Logan Lewis
+#Follow me on Twitter.com/X.com @LL_Visuals
+#Discord: llvisual
+#A device that replaces the Fortnite "Fiends" with a custom skeletal mesh of choice
+
+#TO-DO: Drag yor "CustomFiend" Verse device into your level, then inside the details panel, add your Prop and CreatureSpawner
+                                                            
+CustomFiend := class(creative_device):
+    #Needs to be initialized as an asset, so that SpawnProp can work, can/will be changed into a creative_prop later
+    @editable Prop : creative_prop_asset = DefaultCreativePropAsset 
+    @editable CreatureSpawner : creature_spawner_device = creature_spawner_device {} 
+    OnBegin<override>()<suspends>:void=
+        #Subscribing to the creature_spawner_device SpawnedEvent, calling for FiendSpawned Function and sending the agent that spawned          
+        CreatureSpawner.SpawnedEvent.Subscribe(FiendSpawned) 
+    FiendSpawned(Agent: agent):void=
+        #Grabbing the agent from the Spawned Event and grabbing the associated fort_character
+        if (FortCharacter := Agent.GetFortCharacter[]): 
+            #Hiding FortCharacter, making the Fiend invisible
+            FortCharacter.Hide() 
+            #Initializing local variable of to be our SpawnedPropResult, also passing in the (Asset , Position, Rotation) for SpawnProp
+            #Now the spawned prop wil immediately be at the same position and rotation as the fiend when it spawns
+            SpawnedPropResult := SpawnProp(Prop, FortCharacter.GetTransform().Translation, FortCharacter.GetTransform().Rotation) 
+            #SpawnedProp gives us a "?creative_prop" but we want a creativeprop, there's a few ways this can be written
+            #In this example I'm unwrapping the optional type within this failable function
+            if (SpawnedProp := SpawnedPropResult(0)?):
+                spawn:
+                    #Spawning an asynch function, passing in the FortCharacter and SpawnedProp
+                    FollowFiend(FortCharacter , SpawnedProp)
+    FollowFiend(FortCharacter: fort_character , SpawnedProp: creative_prop)<suspends>:void=
+        #Starting a loop
+        loop:
+            #Checking to see if the FortCharacter is Active within the game session
+            #If the fiend is eliminated, this will result in Moving into line 36
+            #If the fiend is active, i.e. still alive, the loop will move to line 40
+            if (not FortCharacter.IsActive[]):
+                #Getting rid of the spawnedprop, we do this for garbage collection and to mimic the elimination of the fiend
+                SpawnedProp.Dispose()
+                #ending the loop
+                break
+            #Moving the Spawned Prop to (Transform, Rotation, every 0.1)
+            SpawnedProp.MoveTo(FortCharacter.GetTransform().Translation,FortCharacter.GetTransform().Rotation,0.1)
